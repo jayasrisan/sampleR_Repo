@@ -1,0 +1,165 @@
+for rac
+
+run
+{
+allocate channel d1 type disk;
+allocate channel d2 type disk;
+backup as compressed backupset database;
+backup archivelog all not backed up 1 times delete input;
+backup current controlfile;
+backup spfile;
+release channel d1;
+release channel d2;
+}
+
+---
+
+list backup of database;
+list backup of archivelog from time 'sysdate-1';
+list backup of spfile;
+list backup of controlfile;
+
+
+----------
+
+RMAN> connect target /
+
+connected to target database: RACDB (DBID=963542455)
+
+RMAN> list backup of database;
+
+using target database control file instead of recovery catalog
+
+List of Backup Sets
+===================
+
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+1       Full    205.15M    DISK        00:01:30     20-JAN-18 18:53:14
+        BP Key: 1   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.259.965933507
+  List of Datafiles in backup set 1
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  1       Full 2005975    20-JAN-18 18:51:45 +DATA/RACDB/DATAFILE/system.259.965925543
+  8       Full 2005975    20-JAN-18 18:51:45 +DATA/RACDB/DATAFILE/undotbs2.269.965926787
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+2       Full    206.82M    DISK        00:01:36     20-JAN-18 18:53:20
+        BP Key: 2   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.258.965933505
+  List of Datafiles in backup set 2
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  3       Full 2005974    20-JAN-18 18:51:45 +DATA/RACDB/DATAFILE/sysaux.258.965925463
+  4       Full 2005974    20-JAN-18 18:51:45 +DATA/RACDB/DATAFILE/undotbs1.261.965925639
+  6       Full 2005974    20-JAN-18 18:51:45 +DATA/RACDB/DATAFILE/users.260.965925639
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+3       Full    152.45M    DISK        00:01:10     20-JAN-18 18:54:31
+        BP Key: 3   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/633E68FAE8895648E053334EA8C0A760/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.260.965933601
+  List of Datafiles in backup set 3
+  Container ID: 3, PDB Name: PDBRACDB
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  10      Full 2006245    20-JAN-18 18:53:21 +DATA/RACDB/633E68FAE8895648E053334EA8C0A760/DATAFILE/sysaux.274.965927893
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+4       Full    152.45M    DISK        00:01:10     20-JAN-18 18:54:31
+        BP Key: 4   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/633DE8169561499BE053334EA8C06104/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.261.965933603
+  List of Datafiles in backup set 4
+  Container ID: 2, PDB Name: PDB$SEED
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  7       Full 1924437    20-JAN-18 17:12:55 +DATA/RACDB/DD7C48AA5A4404A2E04325AAE80A403C/DATAFILE/sysaux.266.965925737
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+5       Full    52.57M     DISK        00:00:26     20-JAN-18 18:55:03
+        BP Key: 5   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/633E68FAE8895648E053334EA8C0A760/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.262.965933679
+  List of Datafiles in backup set 5
+  Container ID: 3, PDB Name: PDBRACDB
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  9       Full 2006334    20-JAN-18 18:54:37 +DATA/RACDB/633E68FAE8895648E053334EA8C0A760/DATAFILE/system.273.965927893
+  11      Full 2006334    20-JAN-18 18:54:37 +DATA/RACDB/633E68FAE8895648E053334EA8C0A760/DATAFILE/users.276.965928063
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ------------------
+6       Full    52.59M     DISK        00:00:25     20-JAN-18 18:55:03
+        BP Key: 6   Status: AVAILABLE  Compressed: YES  Tag: TAG20180120T185143
+        Piece Name: +FRA_DG/RACDB/633DE8169561499BE053334EA8C06104/BACKUPSET/2018_01_20/nnndf0_tag20180120t185143_0.263.965933679
+  List of Datafiles in backup set 6
+  Container ID: 2, PDB Name: PDB$SEED
+  File LV Type Ckp SCN    Ckp Time           Name
+  ---- -- ---- ---------- ------------------ ----
+  5       Full 1924437    20-JAN-18 17:12:55 +DATA/RACDB/DD7C48AA5A4404A2E04325AAE80A403C/DATAFILE/system.267.965925737
+
+RMAN>
+-----------------
+
+archive log
+
+RMAN> list backup of archivelog from time 'sysdate-1';
+
+
+List of Backup Sets
+===================
+
+
+BS Key  Size       Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ------------------
+7       1.09M      DISK        00:00:01     20-JAN-18 18:55:21
+        BP Key: 7   Status: AVAILABLE  Compressed: NO  Tag: TAG20180120T185518
+        Piece Name: +FRA_DG/RACDB/BACKUPSET/2018_01_20/annnf0_tag20180120t185518_0.267.965933721
+
+  List of Archived Logs in backup set 7
+  Thrd Seq     Low SCN    Low Time           Next SCN   Next Time
+  ---- ------- ---------- ------------------ ---------- ---------
+  1    16      2001931    20-JAN-18 18:41:47 2006585    20-JAN-18 18:55:13
+  2    3       1999289    20-JAN-18 18:37:34 2006589    20-JAN-18 18:55:14
+
+BS Key  Size       Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ------------------
+8       11.18M     DISK        00:00:02     20-JAN-18 18:55:21
+        BP Key: 8   Status: AVAILABLE  Compressed: NO  Tag: TAG20180120T185518
+        Piece Name: +FRA_DG/RACDB/BACKUPSET/2018_01_20/annnf0_tag20180120t185518_0.266.965933721
+
+  List of Archived Logs in backup set 8
+  Thrd Seq     Low SCN    Low Time           Next SCN   Next Time
+  ---- ------- ---------- ------------------ ---------- ---------
+  1    15      1960646    20-JAN-18 17:48:21 2001931    20-JAN-18 18:41:47
+  2    2       1980688    20-JAN-18 17:52:47 1998393    20-JAN-18 18:34:46
+
+RMAN>
+
+----------------
+
+for standalone
+
+run
+{
+allocate channel d1 type disk;
+backup as compressed backupset database;
+backup archivelog all not backed up 1 times;
+backup current controlfile;
+release channel d1;
+}
+
+----
+
+restore on standby
+
+run
+{
+restore database
+}
+
+

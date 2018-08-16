@@ -1,0 +1,56 @@
+for standby sych
+
+
+applied no
+SELECT NAME, CREATOR, SEQUENCE#, APPLIED, COMPLETION_TIME FROM V$ARCHIVED_LOG;
+
+client process details
+SELECT PROCESS, CLIENT_PROCESS, SEQUENCE#, STATUS FROM V$MANAGED_STANDBY;
+
+SELECT LOCAL.THREAD#, LOCAL.SEQUENCE# FROM 
+  (SELECT THREAD#, SEQUENCE# FROM V$ARCHIVED_LOG WHERE DEST_ID=1) LOCAL 
+    WHERE 
+   LOCAL.SEQUENCE# NOT IN 
+   (SELECT SEQUENCE# FROM V$ARCHIVED_LOG WHERE DEST_ID=2 AND 
+   THREAD# = LOCAL.THREAD#); 
+
+
+SELECT CLIENT_PROCESS, PROCESS, THREAD#, SEQUENCE#, STATUS FROM V$MANAGED_STANDBY WHERE CLIENT_PROCESS='LGWR' OR PROCESS='MRP0';
+
+
+
+select dest_id,dest_name, destination,db_unique_name from v$archive_dest where dest_id <= 2;
+
+select group#, thread#, sequence#, bytes, used, status from v$standby_log;
+
+select * from v$archive_gap;
+
+start mrp
+
+alter database recover managed standby database disconnect from session;
+
+scp orapwdgdb oracle@oraracn2:/u02/app/oracle/product/12.1.0/dbhome_1/dbs
+
+REVOKE SYSDG FROM non-SYS-user;
+GRANT SYSDG TO non-SYS-user;  
+
+
+SELECT LOCAL.THREAD#, LOCAL.SEQUENCE# FROM 
+  (SELECT THREAD#, SEQUENCE# FROM V$ARCHIVED_LOG WHERE DEST_ID=1) LOCAL 
+    WHERE 
+   LOCAL.SEQUENCE# NOT IN 
+   (SELECT SEQUENCE# FROM V$ARCHIVED_LOG WHERE DEST_ID=2 AND 
+   THREAD# = LOCAL.THREAD#); 
+
+Last applied log
+
+SELECT THREAD#, MAX(SEQUENCE#) AS "LAST_APPLIED_LOG"
+  FROM V$LOG_HISTORY
+   GROUP BY THREAD#;
+
+SELECT FIRST_TIME, FIRST_CHANGE#, NEXT_CHANGE#, SEQUENCE# FROM V$LOG_HISTORY;
+
+
+
+
+

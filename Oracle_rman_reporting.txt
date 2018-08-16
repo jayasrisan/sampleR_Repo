@@ -1,0 +1,179 @@
+export NLS_DATE_FORMAT="DD-MON-YYYY HH24:MI:SS"
+14) rman
+15) connect target /
+16) startup (Start the SALESDB database if it is not already started.)
+17) list backup summary; (Summary report of all backups)
+18) list backup of database; (Data files backup listing.)
+19) list backup of archivelog from time 'sysdate-7';
+20) list backup of spfile;
+21) list backup of controlfile;
+
+sqlplus / as sysdba
+24) show parameter CONTROL_FILE_RECORD_KEEP_TIME;
+25) alter system set CONTROL_FILE_RECORD_KEEP_TIME=14 scope=both;
+26) show parameter db_recovery_file_dest;
+desc v$recovery_file_dest;
+
+28) set head off;
+29) select name,space_limit/1024/1024,space_used/1024/1024
+from v$recovery_file_dest; (Report the fast recovery area location,total space and space used.)
+30) desc v$recovery_area_usage;
+31) select * from v$recovery_area_usage; (Report usage in fast recovery area based on file type.)
+
+connect target /
+run
+{
+allocate channel d1 type disk;
+allocate channel d2 type disk;
+backup as compressed backupset database format '/u01/rman/salesdb_datafiles_%s_%p_%t';
+backup archivelog all format '/u01/rman/salesdb_arch_%s_%p_%t' not backed up 1 times delete input;
+backup current controlfile format '/u01/rman/salesdb_controlfiles_%s_%p_%t';
+backup spfile format '/u01/rman/salesdb_spfile_%s_%p_%t';
+release channel d1;
+release channel d2;
+}
+
+---------------
+
+v$recovery_area_usage
+
+-----------
+
+run
+{
+backup archivelog from logseq=xx until logseq=yy delete input;
+}
+
+-------------
+
+incremental 0 - full
+
+run
+{
+allocate channel d1 type disk;
+allocate channel d2 type disk;
+backup as compressed backupset tag level0 incremental level 0 database;
+backup tag level0 archivelog all not backed up 1 times delete input;
+backup tag level0 current controlfile;
+backup tag level0 spfile;
+release channel d1;
+release channel d2;
+}
+6)
+
+================
+
+run
+{
+Oracle DBA Book
+Copyright 2010 – 2018 DBA University, Inc. http://www.DBAuniversity.com This is a confidential book and is
+distributed to registered trainees only.
+233
+allocate channel d1 type disk;
+allocate channel d2 type disk;
+backup as compressed backupset tag level1 incremental level 1 database;
+backup tag level1 archivelog all not backed up 1 times delete input;
+backup tag level1 current controlfile;
+backup tag level1 spfile;
+release channel d1;
+release channel d2;
+}
+6) exit
+
+======================
+
+cloning = duplicate
+
+active database
+
+https://docs.oracle.com/en/database/oracle/oracle-database/12.2/bradv/database-backup-and-recovery-users-guide.pdf
+
+page 85
+
+----------------------
+
+duplicate
+
+Open a new terminal
+2) mkdir -p /u01/salesdb_backup
+3) cd /u01/app/oracle/fra/SALESDB/backupset
+4) ls -lrt
+5) cd yyyy_mm_dd (Use the latest backup date.)
+6) cp -p * /u01/salesdb_backup
+7) cd /u01/app/oracle/fra/SALESDB/autobackup
+8) cd yyyy_mm_dd (Use the latest backup date.)
+9) cp -p * /u01/salesdb_backup
+10) cd $ORACLE_HOME/dbs
+11) gedit initSALESQA.ora (Just add only the mandatory db_name and db_domain init parameters and save it.)
+
+export ORACLE_SID=SALESQA
+13) echo $ORACLE_SID (Must show SALESQA)
+14) sqlplus / as sysdba
+15) startup nomount; (Create the SALESQA instance.)
+16) exit
+17)
+a) mkdir /u01/data/SALESQA
+b) mkdir /u01/data/SALESQA_redologs
+18) mkdir -p $ORACLE_BASE/admin/SALESQA/adump
+19) rman
+20) connect auxiliary
+
+run
+{
+allocate auxiliary channel c1 device type disk;
+allocate auxiliary channel c2 device type disk;
+set newname for database to '/u01/data/SALESQA/%b';
+duplicate database to SALESQA
+SPFILE
+parameter_value_convert 'SALESDB','SALESQA'
+SET CONTROL_FILES='/u01/data/SALESQA/c1.ctl'
+BACKUP LOCATION '/u01/salesdb_backup'
+LOGFILE
+GROUP 1 ('/u01/data/SALESQA_redologs/redo1.log') SIZE 100M
+
+GROUP 2 ('/u01/data/SALESQA_redologs/redo2.log') SIZE 100M NOOPEN;
+}
+exit;
+22)sqlplus / as sysdba
+23)set head off;
+24)select name from v$database; (Must show SALESQA)
+25)select status from v$instance; (Must show MOUNTED)
+26)alter system set job_queue_processes = 0 scope=both;
+
+27)create pfile from spfile;
+28)exit
+29)cd $ORACLE_HOME/dbs
+30)gedit initSALESQA.ora (Just observe the contents and close the editor. No need to make any changes.)
+
+=============
+
+SALESDB.__db_cache_size=350000000
+SALESQA.__db_cache_size=360000000
+SALESDB.__java_pool_size=34567890
+SALESQA.__java_pool_size=17534567
+
+-------------------------------------------------------------
+
+31)sqlplus / as sysdba
+Verification
+32) set head off; (Turn off column headings in sqlplus output)
+33) select name from v$database; (Must show SALESQA)
+34) select status from v$instance; (Must show MOUNTED status)
+35) alter database open resetlogs;
+36) select created, resetlogs_time from v$database;
+37) select file_name from dba_data_files; (Must show SALESQA paths)
+38)
+a) select member from v$logfile; (Must show SALESQA paths)
+b)
+select file_name,tablespace_name,bytes/1024/1024
+from dba_temp_files; (RMAN Duplicate automatically creates tempfiles too.)
+39) shutdown immediate;
+
+40) startup mount;
+41) alter database noarchivelog; (Let us disable archive log mode in test databases.)
+42) alter database open;
+43) shutdown immediate; (Let us shutdown the database for now.)
+44) exit
+
+ 
+
